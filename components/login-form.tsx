@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { BookOpen, Loader2 } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -25,23 +26,30 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { signIn } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await signIn(email, password);
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
+      
+      // ログイン成功時はダッシュボードにリダイレクト
+      router.push("/dashboard");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      const errorMessage = error instanceof Error ? error.message : "ログインに失敗しました";
+      
+      // Supabaseエラーメッセージを日本語に変換
+      if (errorMessage.includes("Invalid login credentials")) {
+        setError("メールアドレスまたはパスワードが正しくありません");
+      } else if (errorMessage.includes("Email not confirmed")) {
+        setError("メールアドレスの確認が完了していません");
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -50,34 +58,39 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <BookOpen className="h-6 w-6 text-primary" />
+            <span className="text-lg font-semibold">Wisdom-Hub</span>
+          </div>
+          <CardTitle className="text-2xl">ログイン</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            メールアドレスとパスワードを入力してログインしてください
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">メールアドレス</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="example@email.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">パスワード</Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline text-muted-foreground"
                   >
-                    Forgot your password?
+                    パスワードを忘れた方
                   </Link>
                 </div>
                 <Input
@@ -86,20 +99,32 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && (
+                <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+                  {error}
+                </div>
+              )}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ログイン中...
+                  </>
+                ) : (
+                  "ログイン"
+                )}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              アカウントをお持ちでない方は{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="underline underline-offset-4 text-primary hover:text-primary/80"
               >
-                Sign up
+                サインアップ
               </Link>
             </div>
           </form>

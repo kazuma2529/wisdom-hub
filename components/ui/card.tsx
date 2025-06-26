@@ -17,6 +17,23 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
+// クリック可能なカード用のコンポーネント
+const InteractiveCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow smooth-transition touch-optimized",
+      "cursor-pointer hover:shadow-md active:scale-[0.98] active:shadow-sm",
+      className,
+    )}
+    {...props}
+  />
+));
+InteractiveCard.displayName = "InteractiveCard";
+
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -75,6 +92,7 @@ CardFooter.displayName = "CardFooter";
 
 export {
   Card,
+  InteractiveCard,
   CardHeader,
   CardFooter,
   CardTitle,
