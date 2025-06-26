@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { TrendingUp, Calendar, Target, Clock, Loader2, Crown, Star, Zap, BookOpen } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { progressQueries, workspaceQueries } from "@/lib/supabase/queries";

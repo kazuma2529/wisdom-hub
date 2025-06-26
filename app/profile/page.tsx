@@ -2,7 +2,6 @@
 
 import { User, Settings, Bell, LogOut, Mail, Calendar, Crown, Star, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useRouter } from "next/navigation";
