@@ -77,6 +77,9 @@ export function useAuth(): UseAuthReturn {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        },
       });
       return { data, error };
     },
